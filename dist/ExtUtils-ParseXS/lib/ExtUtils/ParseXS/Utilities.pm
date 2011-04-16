@@ -23,6 +23,7 @@ our (@ISA, @EXPORT_OK);
   analyze_preprocessor_statements
   set_cond
   Warn
+  CurrentLineNumber
   blurt
   death
   check_conditional_preprocessor_statements
@@ -628,6 +629,32 @@ sub set_cond {
   return $cond;
 }
 
+=head2 C<CurrentLineNumber()>
+
+=over 4
+
+=item * Purpose
+
+Figures out the current line number in the XS file.
+
+=item * Arguments
+
+C<$self>
+
+=item * Return Value
+
+The current line number.
+
+=back
+
+=cut
+
+sub CurrentLineNumber {
+  my $self = shift;
+  my $line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
+  return $line_number;
+}
+
 =head2 C<Warn()>
 
 =over 4
@@ -644,9 +671,7 @@ sub set_cond {
 
 sub Warn {
   my $self = shift;
-  # work out the line number
-  my $warn_line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
-
+  my $warn_line_number = $self->CurrentLineNumber();
   print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
 }
 
