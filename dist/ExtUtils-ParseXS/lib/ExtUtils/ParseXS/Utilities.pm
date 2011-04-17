@@ -5,7 +5,6 @@ use Exporter;
 use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
-require ExtUtils::Typemaps;
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -304,6 +303,7 @@ sub process_typemaps {
 
   push @tm, standard_typemap_locations( \@INC );
 
+  require ExtUtils::Typemaps;
   my $typemap = ExtUtils::Typemaps->new;
   foreach my $typemap_loc (@tm) {
     next unless -f $typemap_loc;
@@ -575,7 +575,7 @@ sub analyze_preprocessor_statements {
     push(@{ $self->{XSStack} }, {type => 'if'});
   }
   else {
-    death ("Error: `$statement' with no matching `if'")
+    $self->death("Error: `$statement' with no matching `if'")
       if $self->{XSStack}->[-1]{type} ne 'if';
     if ($self->{XSStack}->[-1]{varname}) {
       push(@{ $self->{InitFileCode} }, "#endif\n");
@@ -691,7 +691,7 @@ sub Warn {
 
 sub blurt {
   my $self = shift;
-  Warn($self, @_);
+  $self->Warn(@_);
   $self->{errors}++
 }
 
@@ -711,7 +711,7 @@ sub blurt {
 
 sub death {
   my $self = shift;
-  Warn($self, @_);
+  $self->Warn(@_);
   exit 1;
 }
 
@@ -739,7 +739,7 @@ sub check_conditional_preprocessor_statements {
         $cpplevel++;
       }
       elsif (!$cpplevel) {
-        Warn( $self, "Warning: #else/elif/endif without #if in this function");
+        $self->Warn("Warning: #else/elif/endif without #if in this function");
         print STDERR "    (precede it with a blank line if the matching #if is outside the function)\n"
           if $self->{XSStack}->[-1]{type} eq 'if';
         return;
@@ -748,7 +748,7 @@ sub check_conditional_preprocessor_statements {
         $cpplevel--;
       }
     }
-    Warn( $self, "Warning: #if without #endif in this function") if $cpplevel;
+    $self->Warn("Warning: #if without #endif in this function") if $cpplevel;
   }
 }
 
